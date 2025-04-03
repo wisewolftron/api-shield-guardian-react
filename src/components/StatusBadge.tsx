@@ -8,20 +8,19 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
+  // Modify the variant types to match what's available in the Badge component
   let variant:
     | "default"
     | "destructive"
     | "outline"
-    | "secondary"
-    | "success"
-    | null
-    | undefined = "default";
+    | "secondary" = "default";
   
   let label = status.toString();
 
   if (typeof status === 'number') {
     if (status >= 200 && status < 300) {
-      variant = "success";
+      // Change from "success" to "secondary" for successful status codes
+      variant = "secondary";
     } else if (status >= 400 && status < 500) {
       variant = "destructive";
     } else if (status >= 500) {
@@ -34,7 +33,8 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
         label = "Blocked";
         break;
       case 'allowed':
-        variant = "success";
+        // Change from "success" to "secondary" for allowed status
+        variant = "secondary";
         label = "Allowed";
         break;
       case 'limited':

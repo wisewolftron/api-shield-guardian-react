@@ -1,4 +1,3 @@
-
 import { BlockedIP, OverviewStats, RateLimitRule, RequestLog, ThreatLog, UsageMetrics, User } from '@/types';
 
 // Function to generate a random IP address
@@ -153,6 +152,11 @@ export const generateUsers = (count: number): User[] => {
 // Generate threat logs
 export const generateThreatLogs = (count: number): ThreatLog[] => {
   const threatTypes = ['brute_force', 'ddos', 'suspicious_pattern', 'bot_detected'] as const;
+  type ThreatType = typeof threatTypes[number];
+  
+  const severities = ['low', 'medium', 'high', 'critical'] as const;
+  type SeverityType = typeof severities[number];
+  
   const mitigationActions = [
     'IP temporarily blocked',
     'Request rate limited',
@@ -160,41 +164,41 @@ export const generateThreatLogs = (count: number): ThreatLog[] => {
     'Account locked',
     'Traffic rerouted',
   ];
-  const severities = ['low', 'medium', 'high', 'critical'] as const;
+
+  const descriptions: Record<ThreatType, string[]> = {
+    brute_force: [
+      'Multiple failed login attempts',
+      'Password reset attempts exceeded',
+      'Credential stuffing detected',
+    ],
+    ddos: [
+      'Abnormal traffic spike detected',
+      'High volume of requests from single IP',
+      'Distributed request pattern detected',
+    ],
+    suspicious_pattern: [
+      'Unusual request sequence',
+      'Abnormal data access pattern',
+      'Potential data scraping activity',
+    ],
+    bot_detected: [
+      'Bot fingerprint identified',
+      'Automated script behavior',
+      'Headless browser detected',
+    ],
+  };
 
   return Array.from({ length: count }, (_, i) => {
-    const type = randomFrom(threatTypes);
-    const descriptions: Record<typeof threatTypes[number], string[]> = {
-      brute_force: [
-        'Multiple failed login attempts',
-        'Password reset attempts exceeded',
-        'Credential stuffing detected',
-      ],
-      ddos: [
-        'Abnormal traffic spike detected',
-        'High volume of requests from single IP',
-        'Distributed request pattern detected',
-      ],
-      suspicious_pattern: [
-        'Unusual request sequence',
-        'Abnormal data access pattern',
-        'Potential data scraping activity',
-      ],
-      bot_detected: [
-        'Bot fingerprint identified',
-        'Automated script behavior',
-        'Headless browser detected',
-      ],
-    };
+    const type = randomFrom(threatTypes as unknown as ThreatType[]) as ThreatType;
 
     return {
       id: `threat-${Date.now()}-${i}`,
       ip: generateRandomIP(),
-      type,
+      type, 
       description: randomFrom(descriptions[type]),
       timestamp: generateRandomDate(3),
       mitigationTaken: randomFrom(mitigationActions),
-      severity: randomFrom(severities),
+      severity: randomFrom(severities as unknown as SeverityType[]) as SeverityType, 
     };
   }).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 };
@@ -206,7 +210,6 @@ export const generateUsageMetrics = (days: number): UsageMetrics[] => {
     date.setDate(date.getDate() - i);
     date.setHours(0, 0, 0, 0);
     
-    // Generate daily metrics with some variations
     return {
       timestamp: date.toISOString(),
       requestCount: 5000 + Math.floor(Math.random() * 5000) - (i * 100),
